@@ -1,8 +1,8 @@
 # TODO: add windows compilation
 # TODO: add mac compilation??
 
-compile:
-	g++ example/main.cpp -lpthread -lm -ldl -o main
+compile_ex_simple:
+	g++ example/simple.cpp -lpthread -lm -ldl -o build/examples/simple_example
 
-run: compile
-	./main
+run_simple: compile_ex_simple
+	./build/examples/simple_example

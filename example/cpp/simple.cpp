@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../Audeal.h"
+#include "../../Audeal.hpp"
 
 int main() {
     Audio audio = Audio();

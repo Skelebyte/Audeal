@@ -36,88 +36,106 @@
 #ifndef AUDEAL_H
 #define AUDEAL_H
 
-#include <iostream>
+#include <stdio.h>
+#include <stdbool.h>
+
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
 
+// Audeal error handling
+typedef enum adlErrors {
+    ADL_UNKNOWN_ERROR = -1,
+    ADL_SUCCESS = 0,
+    ADL_FAILED_TO_INIT_AUDIO = 1,
+    ADL_FAILED_TO_INIT_SOUND = 2,
+    ADL_FAILED_TO_PLAY_SOUND = 3,
+} adlErrors;
 
+static inline int adlGetError(adlErrors error) {
+    switch(error) {
+        case ADL_SUCCESS:
+        printf("ADL_SUCCESS\n");
+        return ADL_SUCCESS;
 
-class Audio {
-    public:
+        case ADL_FAILED_TO_INIT_AUDIO:
+        printf("ADL_FAILED_TO_INIT_AUDIO\n");
+        return ADL_FAILED_TO_INIT_AUDIO;
+
+        case ADL_FAILED_TO_INIT_SOUND:
+        printf("ADL_FAILED_TO_INIT_SOUND\n");
+        return ADL_FAILED_TO_INIT_SOUND;
+
+        case ADL_FAILED_TO_PLAY_SOUND:
+        printf("ADL_FAILED_TO_PLAY_SOUND\n");
+        return ADL_FAILED_TO_PLAY_SOUND;
+
+        default:
+        printf("ADL_UNKNOWN_ERROR\n");
+        return ADL_UNKNOWN_ERROR;
+    }
+}
+
+static inline adlErrors adlSetError(adlErrors* error, adlErrors value) {
+    error = &value;
+    return value;
+}
+
+typedef struct adlAudio {
     ma_engine engine;
     ma_result result;
 
+    adlErrors error;
+} adlAudio;
 
-    public:
-    // Initialize Miniaudio Engine
-    Audio() {
-        result = ma_engine_init(NULL, &engine);
-
-        if (result != MA_SUCCESS) {
-            throw std::runtime_error("Failed to initialize ma_engine!");
-        }
-    }
-    // Destructor, uninitialize the miniaudio engine.
-    ~Audio() {
-        ma_engine_uninit(&engine);
-    }
-};
-
-class Sound {
-    public:
+typedef struct adlSound {
     const char* path;
-
-    protected:
     ma_sound sound;
 
-    private:
     ma_engine* engine;
     ma_result result;
 
-    public:
-    /**
-     * Initializes the ma_sound
-     * @param e A pointer to the Audio class ma_engine.
-     * @param p C-Style string to the directory of the sound file, relative to the executable.
-     * @param global Should the sound be heard everywhere, or in 3D space.
-     * @throws std::runtime_error If failed to initialize the sound (File or internal error).
-     */
-    Sound(ma_engine* e, const char* p, bool global = false) : engine(e) {
+    adlErrors error;
+} adlSound;
 
-        path = p;
-        
-        result = ma_sound_init_from_file(engine, path, 0, NULL, NULL, &sound);
-        if (result != MA_SUCCESS) {
-            throw std::runtime_error("Failed to initialize sound: " + std::string(path));
-        }
 
-        ma_sound_set_spatialization_enabled(&sound, !global);
+// Audeal audio
+static inline adlErrors adlInitAudio(adlAudio* audio) {
+    audio->result = ma_engine_init(NULL, &audio->engine);
+    if(audio->result != MA_SUCCESS) {
+        return adlSetError(&audio->error, ADL_FAILED_TO_INIT_AUDIO);
+    }
 
-    }
-    // Uninitialize the ma_sound
-    ~Sound() {
-        ma_sound_uninit(&sound);
-    }
-    // when using as spatial, i think it needs to be position of sound - player position
-    void spatialUpdate(float x, float y, float z) {
-        ma_sound_set_position(&sound, x, y, z);
-    }
-    int play() {
-        ma_result result = ma_sound_start(&sound);
-        if(result != MA_SUCCESS) {
-            throw std::runtime_error("Failed to initialize sound: " + std::string(path));
-            return result;
-        }
-        return MA_SUCCESS;
-    }
-    void setVolume(float value) {
-        ma_sound_set_volume(&sound, value);
-    } 
-    void setPan(float value) {
-        ma_sound_set_pan(&sound, value);
-    }
-};
+    return adlSetError(&audio->error, ADL_SUCCESS); 
+}
+static inline adlErrors adlUninitAudio(adlAudio* audio) {
+    ma_engine_uninit(&audio->engine);
+    
+    return adlSetError(&audio->error, ADL_SUCCESS);
+}
 
-#endif
+// Audeal sound
+static inline adlErrors adlCreateSound(adlSound* sound, ma_engine* e, const char* p, bool global) {
+    sound->path = p;
+    sound->engine = e;
+
+    sound->result = ma_sound_init_from_file(sound->engine, sound->path, 0, NULL, NULL, &sound->sound);
+    if(sound->result != MA_SUCCESS) {
+        printf("%i", sound->result);
+        return adlSetError(&sound->error, ADL_FAILED_TO_INIT_SOUND);
+    }
+
+    // ma_sound_set_spatialization_enabled(&sound->sound, !global);
+
+    return adlSetError(&sound->error, ADL_SUCCESS);
+}
+static inline adlErrors adlUninitSound(adlSound* sound) {
+    ma_sound_uninit(&sound->sound);
+
+    return adlSetError(&sound->error, ADL_SUCCESS);
+}
+
+
+
+#endif // AUDEAL_H
