@@ -112,6 +112,7 @@ class Sound {
         }
         return MA_SUCCESS;
     }
+    // TODO: stop sound
     void setVolume(float value) {
         ma_sound_set_volume(&sound, value);
     } 

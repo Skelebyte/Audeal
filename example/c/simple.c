@@ -11,14 +11,25 @@ int main() {
 
     adlSound sound;
 
-    // something here causes ADL_UNKNOWN_ERROR...
     if(adlCreateSound(&sound, &audio.engine, "music.wav", true) != ADL_SUCCESS) {
         return adlGetError(sound.error);
+    }
+
+    adlPlaySound(&sound);
+
+    char prev = 0;
+    while(true) {
+        char c = getchar();
+        prev = c;
+        if(c == '\n' && prev == c) {
+            break;
+        }
+        
     }
 
 
     adlUninitSound(&sound);
     adlUninitAudio(&audio);
 
-    return 0;
+    return adlGetError(ADL_SUCCESS);
 }

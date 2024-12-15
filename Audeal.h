@@ -51,6 +51,7 @@ typedef enum adlErrors {
     ADL_FAILED_TO_INIT_AUDIO = 1,
     ADL_FAILED_TO_INIT_SOUND = 2,
     ADL_FAILED_TO_PLAY_SOUND = 3,
+    ADL_FILE_DOES_NOT_EXIST = 4,
 } adlErrors;
 
 static inline int adlGetError(adlErrors error) {
@@ -70,6 +71,10 @@ static inline int adlGetError(adlErrors error) {
         case ADL_FAILED_TO_PLAY_SOUND:
         printf("ADL_FAILED_TO_PLAY_SOUND\n");
         return ADL_FAILED_TO_PLAY_SOUND;
+
+        case ADL_FILE_DOES_NOT_EXIST:
+        printf("ADL_FILE_DOES_NOT_EXIST\n");
+        return ADL_FILE_DOES_NOT_EXIST;
 
         default:
         printf("ADL_UNKNOWN_ERROR\n");
@@ -122,8 +127,12 @@ static inline adlErrors adlCreateSound(adlSound* sound, ma_engine* e, const char
 
     sound->result = ma_sound_init_from_file(sound->engine, sound->path, 0, NULL, NULL, &sound->sound);
     if(sound->result != MA_SUCCESS) {
-        printf("%i", sound->result);
-        return adlSetError(&sound->error, ADL_FAILED_TO_INIT_SOUND);
+        if(sound->result == MA_DOES_NOT_EXIST) {
+            return adlSetError(&sound->error, ADL_FILE_DOES_NOT_EXIST);
+        } else {
+            return adlSetError(&sound->error, ADL_FAILED_TO_INIT_SOUND);
+        }
+        
     }
 
     // ma_sound_set_spatialization_enabled(&sound->sound, !global);
@@ -135,7 +144,17 @@ static inline adlErrors adlUninitSound(adlSound* sound) {
 
     return adlSetError(&sound->error, ADL_SUCCESS);
 }
+static inline adlErrors adlPlaySound(adlSound* sound) {
+    sound->result = ma_sound_start(&sound->sound);
+    if(sound->result != MA_SUCCESS) {
+        return adlSetError(&sound->error, ADL_FAILED_TO_PLAY_SOUND);
+    }
 
+    return adlSetError(&sound->error, ADL_SUCCESS);
+}
+// TODO: stop sound
+// TODO: set volume
+// TODO: set pan
 
 
 #endif // AUDEAL_H
