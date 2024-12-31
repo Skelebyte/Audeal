@@ -42,7 +42,19 @@
 #include "miniaudio.h"
 
 
+class Error {
+    public:
+    static inline std::string getError(int code) {
+        switch(code) {
+            case MA_SUCCESS:
+            return "MA_SUCCESS";
 
+            default:
+            return "UNKNOWN";
+        };
+        return "";
+    }
+};
 
 class Audio {
     public:
@@ -68,9 +80,11 @@ class Audio {
 class Sound {
     public:
     const char* path;
+    bool playing;
 
     protected:
     ma_sound sound;
+    ma_uint64 frame;
 
     private:
     ma_engine* engine;
@@ -105,14 +119,41 @@ class Sound {
         ma_sound_set_position(&sound, x, y, z);
     }
     int play() {
+        if(playing) {
+            return MA_SUCCESS;
+        }
         ma_result result = ma_sound_start(&sound);
         if(result != MA_SUCCESS) {
             throw std::runtime_error("Failed to initialize sound: " + std::string(path));
             return result;
         }
+        playing = true;
         return MA_SUCCESS;
     }
-    // TODO: stop sound
+    
+    int stop() {
+        ma_result result = ma_sound_stop(&sound);
+        if(result != MA_SUCCESS) {
+            throw std::runtime_error("Failed to stop sound.");
+            return result;
+        }
+        playing = false;
+        return MA_SUCCESS;
+    }
+    int pause() {
+        frame = ma_sound_get_time_in_milliseconds(&sound);
+        ma_result result = (ma_result)stop();
+        if(result != MA_SUCCESS) {
+            throw std::runtime_error("Failed to pause sound.");
+            return result;
+        }
+        playing = false;
+        return MA_SUCCESS;
+    }
+    void unpause() {
+        ma_sound_set_start_time_in_milliseconds(&sound, frame);
+        play();
+    }
     void setVolume(float value) {
         ma_sound_set_volume(&sound, value);
     } 
