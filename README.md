@@ -1,2 +1,2 @@
 # Audeal
-Ease of use addon for Miniaudio
+Ease of use wrapper for Miniaudio
