@@ -26,7 +26,7 @@ int main() {
     std::cout<<"enter to quit"<<std::endl;
     std::cin.ignore();
 
-
+    sound.stop();
 
     return 0;
 

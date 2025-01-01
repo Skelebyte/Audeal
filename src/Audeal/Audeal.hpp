@@ -43,10 +43,86 @@
 
 #include <iostream>
 
+#ifdef __APPLE__
+    #define MA_NO_RUNTIME_LINKING
+#endif
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
 
+/**
+ * @namespace adl
+ * @brief The adl namespace contains classes related to audio handling using the Miniaudio library.
+ */
+
+/**
+ * @class adl::Error
+ * @brief A utility class for handling error codes.
+ * 
+ * @fn std::string adl::Error::getError(int code)
+ * @brief Returns a string representation of the error code.
+ * @param code The error code.
+ * @return A string representing the error code.
+ */
+
+/**
+ * @class adl::Audio
+ * @brief Manages the Miniaudio engine.
+ * 
+ * @fn adl::Audio::Audio()
+ * @brief Initializes the Miniaudio engine.
+ * @throws std::runtime_error If the engine fails to initialize.
+ * 
+ * @fn adl::Audio::~Audio()
+ * @brief Uninitializes the Miniaudio engine.
+ */
+
+/**
+ * @class adl::Sound
+ * @brief Manages individual sounds using the Miniaudio library.
+ * 
+ * @fn adl::Sound::Sound(ma_engine* e, const char* p, bool global = false)
+ * @brief Initializes a sound from a file.
+ * @param e A pointer to the Audio class ma_engine.
+ * @param p C-Style string to the directory of the sound file, relative to the executable.
+ * @param global Should the sound be heard everywhere, or in 3D space.
+ * @throws std::runtime_error If the sound fails to initialize.
+ * 
+ * @fn adl::Sound::~Sound()
+ * @brief Uninitializes the sound.
+ * 
+ * @fn void adl::Sound::spatialUpdate(float x, float y, float z)
+ * @brief Updates the spatial position of the sound.
+ * @param x The x-coordinate of the sound.
+ * @param y The y-coordinate of the sound.
+ * @param z The z-coordinate of the sound.
+ * 
+ * @fn int adl::Sound::play()
+ * @brief Starts playing the sound.
+ * @return MA_SUCCESS on success, or an error code on failure.
+ * @throws std::runtime_error If the sound fails to start.
+ * 
+ * @fn int adl::Sound::stop()
+ * @brief Stops playing the sound.
+ * @return MA_SUCCESS on success, or an error code on failure.
+ * @throws std::runtime_error If the sound fails to stop.
+ * 
+ * @fn int adl::Sound::pause()
+ * @brief Pauses the sound.
+ * @return MA_SUCCESS on success, or an error code on failure.
+ * @throws std::runtime_error If the sound fails to pause.
+ * 
+ * @fn void adl::Sound::unpause()
+ * @brief Resumes playing the sound from where it was paused.
+ * 
+ * @fn void adl::Sound::setVolume(float value)
+ * @brief Sets the volume of the sound.
+ * @param value The volume level.
+ * 
+ * @fn void adl::Sound::setPan(float value)
+ * @brief Sets the pan of the sound.
+ * @param value The pan level.
+ */
 namespace adl {
     class Error {
         public:
